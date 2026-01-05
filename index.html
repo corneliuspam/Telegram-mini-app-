@@ -1,62 +1,89 @@
 <!DOCTYPE html><html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Payeer Tech Earn</title>
+  <title>Payeer Tech Earn Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
-    body { font-family: Arial, sans-serif; background:#0f172a; color:#fff; margin:0; padding:0 }
-    header { background:#020617; padding:15px; text-align:center; font-size:20px; font-weight:bold }
-    .container { padding:15px }
-    .card { background:#020617; border-radius:10px; padding:15px; margin-bottom:15px }
-    button { width:100%; padding:12px; border:none; border-radius:8px; background:#22c55e; Black:#000; font-size:16px }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:#0f172a; color:#fff; margin:0; padding:0 }
+    header { background:#1e293b; padding:20px; text-align:center; font-size:22px; font-weight:bold; letter-spacing:1px }
+    .container { padding:20px; max-width:600px; margin:auto }
+    .card { background:#1e293b; border-radius:12px; padding:20px; margin-bottom:20px; box-shadow:0 4px 12px rgba(0,0,0,0.5) }
+    button { width:100%; padding:14px; border:none; border-radius:10px; background:#22c55e; color:#000; font-size:16px; font-weight:bold; margin-top:10px; cursor:pointer }
     button.secondary { background:#38bdf8 }
     .small { font-size:13px; color:#cbd5f5 }
-    input { width:100%; padding:10px; border-radius:6px; border:none; margin-top:5px }
+    input { width:100%; padding:12px; border-radius:8px; border:none; margin-top:5px; background:#0f172a; color:#fff }
     a { color:#38bdf8 }
+    h3 { margin-top:0 }
   </style>
 </head>
 <body>
-<header>Payeer Tech</header>
+<header>🚀 Payeer Tech Earn Dashboard</header>
 <div class="container">  <div class="card">
-    <h3>👤 User Info</h3>
-    <p id="user">Loading...</p>
+    <h3>👤 Welcome</h3>
+    <p id="user">Loading user info...</p>
   </div>  <div class="card">
     <h3>💰 Earnings</h3>
-    <p>Total Balance: <b id="balance">0</b> points</p>
+    <p>Total Points: <b id="balance">0</b></p>
+    <p class="small">Points can be converted to rewards after admin approval</p>
   </div>  <div class="card">
     <h3>📌 Tasks</h3>
     <p class="small">Complete tasks to earn points</p>
-    <button onclick="completeTask('join_channel')">Join Telegram Channel (+500)</button><br><br>
-    <button onclick="completeTask('visit_site')">Visit Website (+200)</button>
+    <button onclick="completeTask('join_channel')">Join Telegram Channel (+50 pts)</button>
+    <button onclick="completeTask('visit_site')">Visit Partner Website (+20 pts)</button>
+    <button onclick="completeTask('subscribe_youtube')">Subscribe on YouTube (+30 pts)</button>
   </div>  <div class="card">
     <h3>🔗 Referral</h3>
-    <p>Your referral link:</p>
+    <p>Share your referral link to earn bonus points:</p>
     <input id="refLink" readonly />
     <button class="secondary" onclick="copyRef()">Copy Link</button>
+  </div>  <div class="card">
+    <h3>📈 Progress</h3>
+    <p class="small">Track your completed tasks and referrals here.</p>
+    <ul id="taskList"></ul>
   </div></div><script>
   const tg = window.Telegram.WebApp;
   tg.expand();
 
   const user = tg.initDataUnsafe?.user;
   let balance = 0;
+  let completedTasks = [];
 
+  // Initialize user info and referral link
   if (user) {
     document.getElementById('user').innerText = `${user.first_name} (@${user.username || 'no username'})`;
-    const ref = `https://t.me/PayeerTech_Bot?start=${user.id}`;
+    const ref = `https://t.me/PayeerTech_Bot?start=${user.id}`; // <-- Change to your bot username
     document.getElementById('refLink').value = ref;
   }
 
   function completeTask(task) {
-    if (task === 'join_channel') balance += 100;
-    if (task === 'visit_site') balance += 500;
+    if (completedTasks.includes(task)) {
+      tg.showAlert('You already completed this task!');
+      return;
+    }
+
+    let points = 0;
+    switch(task) {
+      case 'join_channel': points = 50; break;
+      case 'visit_site': points = 20; break;
+      case 'subscribe_youtube': points = 30; break;
+    }
+
+    balance += points;
+    completedTasks.push(task);
     document.getElementById('balance').innerText = balance;
-    tg.showAlert('Task completed! Reward added');
+
+    // Add to progress list
+    const li = document.createElement('li');
+    li.innerText = `${task.replace('_',' ')}: +${points} pts`;
+    document.getElementById('taskList').appendChild(li);
+
+    tg.showAlert(`Task completed! You earned ${points} points.`);
   }
 
   function copyRef() {
     navigator.clipboard.writeText(document.getElementById('refLink').value);
-    tg.showAlert('Referral link copied');
+    tg.showAlert('Referral link copied!');
   }
 </script></body>
 </html>
